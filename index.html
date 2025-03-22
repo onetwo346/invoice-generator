@@ -1,66 +1,171 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Free Invoice Generator</title>
+  <title>Invoice Generator Pro</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 10px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+      color: #333;
     }
     h1 {
-      font-size: 1.5em;
+      font-size: 2em;
+      color: #2c3e50;
       text-align: center;
+      margin-bottom: 20px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
     }
     input {
       width: 100%;
       padding: 10px;
-      margin: 5px 0;
-      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
       font-size: 1em;
+      box-sizing: border-box;
     }
-    button, a.btn {
-      display: block;
+    button {
       width: 100%;
       padding: 12px;
-      margin: 10px 0;
-      background: #4CAF50;
+      background: #2980b9;
       color: white;
-      text-align: center;
       border: none;
-      text-decoration: none;
+      border-radius: 4px;
       font-size: 1.1em;
       cursor: pointer;
+      transition: background 0.3s;
     }
-    a.btn {
-      background: #2196F3;
+    button:hover {
+      background: #3498db;
+    }
+    .donate-btn {
+      background: #e67e22;
+    }
+    .donate-btn:hover {
+      background: #f39c12;
+    }
+    .how-it-works {
+      margin-top: 20px;
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 4px;
+    }
+    .how-it-works h2 {
+      font-size: 1.2em;
+      cursor: pointer;
+      color: #2980b9;
+    }
+    .how-it-works ol {
+      display: none;
+      padding-left: 20px;
+    }
+    .how-it-works ol.active {
+      display: block;
+    }
+    /* Modal for Stripe */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 500px;
+      height: 80%;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .modal-content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
     }
     @media (max-width: 600px) {
-      h1 { font-size: 1.2em; }
-      input, button, a.btn { font-size: 0.9em; }
+      h1 { font-size: 1.5em; }
+      input, button { font-size: 0.9em; }
+      .container { padding: 15px; }
     }
   </style>
 </head>
 <body>
-  <h1>Free Invoice Generator</h1>
-  <div class="form-group">
-    <input id="senderName" placeholder="Your Name" required><br>
-    <input id="clientName" placeholder="Client Name" required><br>
-    <input id="itemDesc" placeholder="Item Description" required><br>
-    <input id="itemQty" type="number" placeholder="Quantity" min="1" required><br>
-    <input id="itemRate" type="number" placeholder="Rate" min="0" step="0.01" required><br>
+  <h1>Invoice Generator Pro</h1>
+  <div class="container">
+    <div class="form-group">
+      <label for="senderName">Your Name</label>
+      <input id="senderName" placeholder="e.g., John Doe" required>
+    </div>
+    <div class="form-group">
+      <label for="clientName">Client Name</label>
+      <input id="clientName" placeholder="e.g., Jane Smith" required>
+    </div>
+    <div class="form-group">
+      <label for="itemDesc">Item Description</label>
+      <input id="itemDesc" placeholder="e.g., Web Design Services" required>
+    </div>
+    <div class="form-group">
+      <label for="itemQty">Quantity</label>
+      <input id="itemQty" type="number" placeholder="e.g., 1" min="1" required>
+    </div>
+    <div class="form-group">
+      <label for="itemRate">Rate ($)</label>
+      <input id="itemRate" type="number" placeholder="e.g., 50.00" min="0" step="0.01" required>
+    </div>
+    <button onclick="generatePDF()">Generate & Download PDF</button>
+    <button class="donate-btn" onclick="openDonation()">Support with a Donation</button>
   </div>
-  <button onclick="generatePDF()">Download PDF</button>
-  <a href="https://buy.stripe.com/00g16Q5xv4Cw05G6oo" target="_blank" class="btn">Support with a Donation</a>
+
+  <div class="how-it-works">
+    <h2 onclick="toggleHowItWorks()">How It Works</h2>
+    <ol id="howItWorksList">
+      <li>Fill in your details and the client’s info above.</li>
+      <li>Add your item description, quantity, and rate.</li>
+      <li>Click "Generate & Download PDF" to create your invoice—it’ll download automatically!</li>
+      <li>Love this tool? Support it with a donation to keep it free for everyone.</li>
+    </ol>
+  </div>
+
+  <!-- Modal for Stripe Donation -->
+  <div id="donationModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeDonation()">×</span>
+      <iframe src="https://buy.stripe.com/00g16Q5xv4Cw05G6oo"></iframe>
+    </div>
+  </div>
 
   <script>
     const { jsPDF } = window.jspdf;
+
     function generatePDF() {
       const doc = new jsPDF();
       const senderName = document.getElementById("senderName").value;
@@ -70,24 +175,44 @@
       const rate = document.getElementById("itemRate").value;
       const total = (qty * rate).toFixed(2);
 
-      // PDF layout
-      doc.setFontSize(16);
-      doc.text("Invoice", 10, 10);
+      // Professional PDF layout
+      doc.setFontSize(18);
+      doc.text("Invoice", 20, 20);
       doc.setFontSize(12);
-      doc.text(`From: ${senderName}`, 10, 20);
-      doc.text(`To: ${clientName}`, 10, 30);
-      doc.text(`${desc}: ${qty} x $${rate} = $${total}`, 10, 40);
-      doc.text("Made with ♥ by [YourName]. Support at: bit.ly/invoice-donate", 10, 50);
+      doc.text(`From: ${senderName}`, 20, 30);
+      doc.text(`To: ${clientName}`, 20, 40);
+      doc.text(`Description: ${desc}`, 20, 50);
+      doc.text(`Quantity: ${qty}`, 20, 60);
+      doc.text(`Rate: $${rate}`, 20, 70);
+      doc.text(`Total: $${total}`, 20, 80);
+      doc.setFontSize(10);
+      doc.text("Created by Invoice Generator Pro | Support us: bit.ly/invoice-donate", 20, 100);
 
-      // Download the PDF
+      // Auto-download
       doc.save("invoice.pdf");
 
-      // Donation prompt
+      // Optional: Show donation prompt after download
       setTimeout(() => {
-        if (confirm("Thanks for using this free tool! If it helped you, consider a small donation to keep it running.")) {
-          window.open("https://buy.stripe.com/00g16Q5xv4Cw05G6oo", "_blank");
+        if (confirm("Invoice downloaded! If this tool helped you, please consider supporting it.")) {
+          openDonation();
         }
-      }, 500); // Delay to ensure download starts first
+      }, 500);
+    }
+
+    // Toggle How It Works section
+    function toggleHowItWorks() {
+      const list = document.getElementById("howItWorksList");
+      list.classList.toggle("active");
+    }
+
+    // Open Donation Modal
+    function openDonation() {
+      document.getElementById("donationModal").style.display = "flex";
+    }
+
+    // Close Donation Modal
+    function closeDonation() {
+      document.getElementById("donationModal").style.display = "none";
     }
   </script>
 </body>
