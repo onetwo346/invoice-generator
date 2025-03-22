@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Free Invoice Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 10px;
+    }
+    h1 {
+      font-size: 1.5em;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    button, a.btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      background: #4CAF50;
+      color: white;
+      text-align: center;
+      border: none;
+      text-decoration: none;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+    a.btn {
+      background: #2196F3;
+    }
+    @media (max-width: 600px) {
+      h1 { font-size: 1.2em; }
+      input, button, a.btn { font-size: 0.9em; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Free Invoice Generator</h1>
+  <div class="form-group">
+    <input id="senderName" placeholder="Your Name" required><br>
+    <input id="clientName" placeholder="Client Name" required><br>
+    <input id="itemDesc" placeholder="Item Description" required><br>
+    <input id="itemQty" type="number" placeholder="Quantity" min="1" required><br>
+    <input id="itemRate" type="number" placeholder="Rate" min="0" step="0.01" required><br>
+  </div>
+  <button onclick="generatePDF()">Download PDF</button>
+  <a href="https://buy.stripe.com/00g16Q5xv4Cw05G6oo" target="_blank" class="btn">Support with a Donation</a>
+
+  <script>
+    const { jsPDF } = window.jspdf;
+    function generatePDF() {
+      const doc = new jsPDF();
+      const senderName = document.getElementById("senderName").value;
+      const clientName = document.getElementById("clientName").value;
+      const desc = document.getElementById("itemDesc").value;
+      const qty = document.getElementById("itemQty").value;
+      const rate = document.getElementById("itemRate").value;
+      const total = (qty * rate).toFixed(2);
+
+      // PDF layout
+      doc.setFontSize(16);
+      doc.text("Invoice", 10, 10);
+      doc.setFontSize(12);
+      doc.text(`From: ${senderName}`, 10, 20);
+      doc.text(`To: ${clientName}`, 10, 30);
+      doc.text(`${desc}: ${qty} x $${rate} = $${total}`, 10, 40);
+      doc.text("Made with ♥ by [YourName]. Support at: bit.ly/invoice-donate", 10, 50);
+
+      // Download the PDF
+      doc.save("invoice.pdf");
+
+      // Donation prompt
+      setTimeout(() => {
+        if (confirm("Thanks for using this free tool! If it helped you, consider a small donation to keep it running.")) {
+          window.open("https://buy.stripe.com/00g16Q5xv4Cw05G6oo", "_blank");
+        }
+      }, 500); // Delay to ensure download starts first
+    }
+  </script>
+</body>
+</html>
