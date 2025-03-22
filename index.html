@@ -4,6 +4,7 @@
   <title>Invoice Generator Pro</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
   <style>
     body {
       font-family: 'Poppins', Arial, sans-serif;
@@ -25,6 +26,7 @@
       background: linear-gradient(135deg, #2980b9, #6ab7f5);
       color: white;
       padding: 20px;
+      box-sizing: border-box;
     }
     #introPage h1 {
       font-size: 2.5em;
@@ -72,6 +74,8 @@
       padding: 20px;
       max-width: 900px;
       margin: 0 auto;
+      min-height: 100vh;
+      box-sizing: border-box;
     }
     .container {
       background: white;
@@ -107,6 +111,15 @@
       border-color: #2980b9;
       outline: none;
     }
+    .error {
+      border-color: #e74c3c !important;
+    }
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.9em;
+      margin-top: 5px;
+      display: none;
+    }
     button {
       width: 100%;
       padding: 15px;
@@ -123,10 +136,49 @@
     }
     .donate-btn {
       background: #e67e22;
+      margin-top: 10px;
     }
     .donate-btn:hover {
       background: #f39c12;
     }
+
+    /* Pop-Up Window (Modal) */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 500px;
+      height: 80%;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .modal-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      color: #333;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
     @media (max-width: 600px) {
       #introPage h1 { font-size: 1.8em; }
       .intro-btn { font-size: 1em; padding: 12px 25px; }
@@ -134,6 +186,9 @@
       .container { padding: 20px; }
       h1 { font-size: 1.5em; }
       input, button { font-size: 0.9em; }
+      .how-it-works h2 { font-size: 1.3em; }
+      .how-it-works li { font-size: 0.9em; }
+      .modal-content { width: 95%; height: 70%; }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -161,25 +216,38 @@
       <div class="form-group">
         <label for="senderName">Your Name</label>
         <input id="senderName" placeholder="e.g., John Doe" required>
+        <div class="error-message" id="senderNameError">Please enter your name.</div>
       </div>
       <div class="form-group">
         <label for="clientName">Client Name</label>
         <input id="clientName" placeholder="e.g., Jane Smith" required>
+        <div class="error-message" id="clientNameError">Please enter the client’s name.</div>
       </div>
       <div class="form-group">
         <label for="itemDesc">Item Description</label>
         <input id="itemDesc" placeholder="e.g., Web Design Services" required>
+        <div class="error-message" id="itemDescError">Please enter an item description.</div>
       </div>
       <div class="form-group">
         <label for="itemQty">Quantity</label>
         <input id="itemQty" type="number" placeholder="e.g., 1" min="1" required>
+        <div class="error-message" id="itemQtyError">Please enter a valid quantity (minimum 1).</div>
       </div>
       <div class="form-group">
         <label for="itemRate">Rate ($)</label>
         <input id="itemRate" type="number" placeholder="e.g., 50.00" min="0" step="0.01" required>
+        <div class="error-message" id="itemRateError">Please enter a valid rate (minimum 0).</div>
       </div>
       <button onclick="generatePDF()">Generate & Download PDF</button>
       <button class="donate-btn" onclick="openDonation()">Support with a Donation</button>
+    </div>
+  </div>
+
+  <!-- Modal for Stripe Donation -->
+  <div id="donationModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeDonation()">×</span>
+      <div id="stripeContainer"></div>
     </div>
   </div>
 
@@ -190,46 +258,140 @@
     function goToMainPage() {
       document.getElementById("introPage").style.display = "none";
       document.getElementById("mainPage").style.display = "block";
+      window.scrollTo(0, 0); // Ensure page starts at the top
+    }
+
+    // Input Validation
+    function validateInputs() {
+      let isValid = true;
+      const fields = [
+        { id: "senderName", errorId: "senderNameError", message: "Please enter your name." },
+        { id: "clientName", errorId: "clientNameError", message: "Please enter the client’s name." },
+        { id: "itemDesc", errorId: "itemDescError", message: "Please enter an item description." },
+        { id: "itemQty", errorId: "itemQtyError", message: "Please enter a valid quantity (minimum 1)." },
+        { id: "itemRate", errorId: "itemRateError", message: "Please enter a valid rate (minimum 0)." }
+      ];
+
+      fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        const error = document.getElementById(field.errorId);
+        const value = input.value.trim();
+
+        // Reset error state
+        input.classList.remove("error");
+        error.style.display = "none";
+
+        // Validate
+        if (field.id === "itemQty") {
+          if (!value || parseInt(value) < 1) {
+            input.classList.add("error");
+            error.style.display = "block";
+            error.textContent = field.message;
+            isValid = false;
+          }
+        } else if (field.id === "itemRate") {
+          if (!value || parseFloat(value) < 0) {
+            input.classList.add("error");
+            error.style.display = "block";
+            error.textContent = field.message;
+            isValid = false;
+          }
+        } else if (!value) {
+          input.classList.add("error");
+          error.style.display = "block";
+          error.textContent = field.message;
+          isValid = false;
+        }
+      });
+
+      return isValid;
     }
 
     // Generate PDF
     function generatePDF() {
-      const doc = new jsPDF();
-      const senderName = document.getElementById("senderName").value;
-      const clientName = document.getElementById("clientName").value;
-      const desc = document.getElementById("itemDesc").value;
-      const qty = document.getElementById("itemQty").value;
-      const rate = document.getElementById("itemRate").value;
-      const total = (qty * rate).toFixed(2);
+      if (!validateInputs()) {
+        alert("Please fill in all fields correctly before generating the invoice.");
+        return;
+      }
 
-      // Professional PDF Layout
-      doc.setFontSize(18);
-      doc.text("Invoice", 20, 20);
-      doc.setFontSize(12);
-      doc.text(`From: ${senderName}`, 20, 30);
-      doc.text(`To: ${clientName}`, 20, 40);
-      doc.text(`Description: ${desc}`, 20, 50);
-      doc.text(`Quantity: ${qty}`, 20, 60);
-      doc.text(`Rate: $${rate}`, 20, 70);
-      doc.text(`Total: $${total}`, 20, 80);
-      doc.setFontSize(10);
-      doc.text("Created by Invoice Generator Pro | Support us: bit.ly/invoice-donate", 20, 100);
+      try {
+        const doc = new jsPDF();
+        const senderName = document.getElementById("senderName").value.trim();
+        const clientName = document.getElementById("clientName").value.trim();
+        const desc = document.getElementById("itemDesc").value.trim();
+        const qty = parseInt(document.getElementById("itemQty").value);
+        const rate = parseFloat(document.getElementById("itemRate").value);
+        const total = (qty * rate).toFixed(2);
 
-      // Auto-download
-      doc.save("invoice.pdf");
+        // Professional PDF Layout
+        doc.setFontSize(18);
+        doc.text("Invoice", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`From: ${senderName}`, 20, 30);
+        doc.text(`To: ${clientName}`, 20, 40);
+        doc.text(`Description: ${desc}`, 20, 50);
+        doc.text(`Quantity: ${qty}`, 20, 60);
+        doc.text(`Rate: $${rate.toFixed(2)}`, 20, 70);
+        doc.text(`Total: $${total}`, 20, 80);
+        doc.setFontSize(10);
+        doc.text("Created by Invoice Generator Pro | Support us: bit.ly/invoice-donate", 20, 100);
 
-      // Donation Prompt
-      setTimeout(() => {
-        if (confirm("Invoice downloaded! If this tool helped you, please consider supporting it.")) {
-          openDonation();
-        }
-      }, 500);
+        // Auto-download
+        doc.save("invoice.pdf");
+
+        // Donation Prompt
+        setTimeout(() => {
+          if (confirm("Invoice downloaded! If this tool helped you, please consider supporting it.")) {
+            openDonation();
+          }
+        }, 500);
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+        alert("An error occurred while generating the PDF. Please try again.");
+      }
     }
 
-    // Open Donation in New Tab
+    // Open Donation in Pop-Up Window
     function openDonation() {
-      window.open("https://buy.stripe.com/00g16Q5xv4Cw05G6oo", "_blank");
+      const modal = document.getElementById("donationModal");
+      const container = document.getElementById("stripeContainer");
+
+      // Create an iframe to load the Stripe page
+      const iframe = document.createElement("iframe");
+      iframe.className = "modal-iframe";
+      iframe.src = "https://buy.stripe.com/00g16Q5xv4Cw05G6oo";
+      iframe.onload = () => {
+        console.log("Stripe iframe loaded successfully");
+      };
+      iframe.onerror = () => {
+        console.error("Error loading Stripe iframe");
+        alert("Failed to load the donation page. Please try again or open the link manually: https://buy.stripe.com/00g16Q5xv4Cw05G6oo");
+        closeDonation();
+      };
+
+      // Clear any existing content and append the iframe
+      container.innerHTML = "";
+      container.appendChild(iframe);
+
+      // Show the modal
+      modal.style.display = "flex";
     }
+
+    // Close Donation Pop-Up
+    function closeDonation() {
+      const modal = document.getElementById("donationModal");
+      const container = document.getElementById("stripeContainer");
+      modal.style.display = "none";
+      container.innerHTML = ""; // Clear iframe to prevent memory leaks
+    }
+
+    // Close Modal on Outside Click
+    window.addEventListener("click", (event) => {
+      const modal = document.getElementById("donationModal");
+      if (event.target === modal) {
+        closeDonation();
+      }
+    });
   </script>
 </body>
 </html>
