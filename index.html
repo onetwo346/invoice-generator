@@ -6,12 +6,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: 'Poppins', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f4f8;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    /* Intro Page */
+    #introPage {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      background: linear-gradient(135deg, #2980b9, #6ab7f5);
+      color: white;
+      padding: 20px;
+    }
+    #introPage h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    .intro-btn {
+      padding: 15px 30px;
+      background: #e67e22;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 1.2em;
+      cursor: pointer;
+      animation: pulse 1.5s infinite;
+      transition: background 0.3s;
+    }
+    .intro-btn:hover {
+      background: #f39c12;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    }
+    .how-it-works {
+      margin-top: 30px;
+      max-width: 600px;
+    }
+    .how-it-works h2 {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+    .how-it-works ol {
+      text-align: left;
+      padding-left: 20px;
+    }
+    .how-it-works li {
+      margin-bottom: 10px;
+      font-size: 1em;
+    }
+
+    /* Main Page */
+    #mainPage {
+      display: none;
+      padding: 20px;
       max-width: 900px;
       margin: 0 auto;
-      padding: 20px;
-      background: #f5f5f5;
-      color: #333;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     h1 {
       font-size: 2em;
@@ -19,35 +85,35 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    .container {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
     .form-group {
       margin-bottom: 20px;
     }
     label {
       display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #555;
     }
     input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border: 1px solid #ddd;
-      border-radius: 4px;
+      border-radius: 5px;
       font-size: 1em;
       box-sizing: border-box;
+      transition: border 0.3s;
+    }
+    input:focus {
+      border-color: #2980b9;
+      outline: none;
     }
     button {
       width: 100%;
-      padding: 12px;
+      padding: 15px;
       background: #2980b9;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 5px;
       font-size: 1.1em;
       cursor: pointer;
       transition: background 0.3s;
@@ -61,111 +127,72 @@
     .donate-btn:hover {
       background: #f39c12;
     }
-    .how-it-works {
-      margin-top: 20px;
-      background: #ecf0f1;
-      padding: 15px;
-      border-radius: 4px;
-    }
-    .how-it-works h2 {
-      font-size: 1.2em;
-      cursor: pointer;
-      color: #2980b9;
-    }
-    .how-it-works ol {
-      display: none;
-      padding-left: 20px;
-    }
-    .how-it-works ol.active {
-      display: block;
-    }
-    /* Modal for Stripe */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: white;
-      width: 90%;
-      max-width: 500px;
-      height: 80%;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .modal-content iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    .close {
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 24px;
-      cursor: pointer;
-    }
     @media (max-width: 600px) {
+      #introPage h1 { font-size: 1.8em; }
+      .intro-btn { font-size: 1em; padding: 12px 25px; }
+      #mainPage { padding: 15px; }
+      .container { padding: 20px; }
       h1 { font-size: 1.5em; }
       input, button { font-size: 0.9em; }
-      .container { padding: 15px; }
     }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Invoice Generator Pro</h1>
-  <div class="container">
-    <div class="form-group">
-      <label for="senderName">Your Name</label>
-      <input id="senderName" placeholder="e.g., John Doe" required>
+  <!-- Intro Page -->
+  <div id="introPage">
+    <h1>Welcome to Invoice Generator Pro</h1>
+    <button class="intro-btn" onclick="goToMainPage()">Tap to Generate Invoice</button>
+    <div class="how-it-works">
+      <h2>How It Works</h2>
+      <ol>
+        <li>Enter your details and your client’s information.</li>
+        <li>Add the item description, quantity, and rate for your service.</li>
+        <li>Click "Generate & Download PDF" to create your invoice—it downloads automatically!</li>
+        <li>Love this tool? Support it with a donation to keep it free for everyone.</li>
+      </ol>
     </div>
-    <div class="form-group">
-      <label for="clientName">Client Name</label>
-      <input id="clientName" placeholder="e.g., Jane Smith" required>
-    </div>
-    <div class="form-group">
-      <label for="itemDesc">Item Description</label>
-      <input id="itemDesc" placeholder="e.g., Web Design Services" required>
-    </div>
-    <div class="form-group">
-      <label for="itemQty">Quantity</label>
-      <input id="itemQty" type="number" placeholder="e.g., 1" min="1" required>
-    </div>
-    <div class="form-group">
-      <label for="itemRate">Rate ($)</label>
-      <input id="itemRate" type="number" placeholder="e.g., 50.00" min="0" step="0.01" required>
-    </div>
-    <button onclick="generatePDF()">Generate & Download PDF</button>
-    <button class="donate-btn" onclick="openDonation()">Support with a Donation</button>
   </div>
 
-  <div class="how-it-works">
-    <h2 onclick="toggleHowItWorks()">How It Works</h2>
-    <ol id="howItWorksList">
-      <li>Fill in your details and the client’s info above.</li>
-      <li>Add your item description, quantity, and rate.</li>
-      <li>Click "Generate & Download PDF" to create your invoice—it’ll download automatically!</li>
-      <li>Love this tool? Support it with a donation to keep it free for everyone.</li>
-    </ol>
-  </div>
-
-  <!-- Modal for Stripe Donation -->
-  <div id="donationModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeDonation()">×</span>
-      <iframe src="https://buy.stripe.com/00g16Q5xv4Cw05G6oo"></iframe>
+  <!-- Main Page -->
+  <div id="mainPage">
+    <h1>Create Your Invoice</h1>
+    <div class="container">
+      <div class="form-group">
+        <label for="senderName">Your Name</label>
+        <input id="senderName" placeholder="e.g., John Doe" required>
+      </div>
+      <div class="form-group">
+        <label for="clientName">Client Name</label>
+        <input id="clientName" placeholder="e.g., Jane Smith" required>
+      </div>
+      <div class="form-group">
+        <label for="itemDesc">Item Description</label>
+        <input id="itemDesc" placeholder="e.g., Web Design Services" required>
+      </div>
+      <div class="form-group">
+        <label for="itemQty">Quantity</label>
+        <input id="itemQty" type="number" placeholder="e.g., 1" min="1" required>
+      </div>
+      <div class="form-group">
+        <label for="itemRate">Rate ($)</label>
+        <input id="itemRate" type="number" placeholder="e.g., 50.00" min="0" step="0.01" required>
+      </div>
+      <button onclick="generatePDF()">Generate & Download PDF</button>
+      <button class="donate-btn" onclick="openDonation()">Support with a Donation</button>
     </div>
   </div>
 
   <script>
     const { jsPDF } = window.jspdf;
 
+    // Navigate to Main Page
+    function goToMainPage() {
+      document.getElementById("introPage").style.display = "none";
+      document.getElementById("mainPage").style.display = "block";
+    }
+
+    // Generate PDF
     function generatePDF() {
       const doc = new jsPDF();
       const senderName = document.getElementById("senderName").value;
@@ -175,7 +202,7 @@
       const rate = document.getElementById("itemRate").value;
       const total = (qty * rate).toFixed(2);
 
-      // Professional PDF layout
+      // Professional PDF Layout
       doc.setFontSize(18);
       doc.text("Invoice", 20, 20);
       doc.setFontSize(12);
@@ -191,7 +218,7 @@
       // Auto-download
       doc.save("invoice.pdf");
 
-      // Optional: Show donation prompt after download
+      // Donation Prompt
       setTimeout(() => {
         if (confirm("Invoice downloaded! If this tool helped you, please consider supporting it.")) {
           openDonation();
@@ -199,20 +226,9 @@
       }, 500);
     }
 
-    // Toggle How It Works section
-    function toggleHowItWorks() {
-      const list = document.getElementById("howItWorksList");
-      list.classList.toggle("active");
-    }
-
-    // Open Donation Modal
+    // Open Donation in New Tab
     function openDonation() {
-      document.getElementById("donationModal").style.display = "flex";
-    }
-
-    // Close Donation Modal
-    function closeDonation() {
-      document.getElementById("donationModal").style.display = "none";
+      window.open("https://buy.stripe.com/00g16Q5xv4Cw05G6oo", "_blank");
     }
   </script>
 </body>
