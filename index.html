@@ -4,7 +4,6 @@
   <title>Invoice Generator Pro</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta charset="UTF-8">
   <style>
     body {
       font-family: 'Poppins', Arial, sans-serif;
@@ -26,7 +25,6 @@
       background: linear-gradient(135deg, #2980b9, #6ab7f5);
       color: white;
       padding: 20px;
-      box-sizing: border-box;
     }
     #introPage h1 {
       font-size: 2.5em;
@@ -74,8 +72,6 @@
       padding: 20px;
       max-width: 900px;
       margin: 0 auto;
-      min-height: 100vh;
-      box-sizing: border-box;
     }
     .container {
       background: white;
@@ -111,15 +107,6 @@
       border-color: #2980b9;
       outline: none;
     }
-    .error {
-      border-color: #e74c3c !important;
-    }
-    .error-message {
-      color: #e74c3c;
-      font-size: 0.9em;
-      margin-top: 5px;
-      display: none;
-    }
     button {
       width: 100%;
       padding: 15px;
@@ -136,89 +123,10 @@
     }
     .donate-btn {
       background: #e67e22;
-      margin-top: 10px;
     }
     .donate-btn:hover {
       background: #f39c12;
     }
-
-    /* Pop-Up Window (Modal) */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background: white;
-      width: 90%;
-      max-width: 500px;
-      height: 80%;
-      max-height: 600px;
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
-    .modal-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      overflow: hidden;
-    }
-    .close {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 24px;
-      font-weight: bold;
-      color: #333;
-      cursor: pointer;
-      z-index: 1001;
-      background: rgba(255,255,255,0.8);
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    .close:hover {
-      background: rgba(255,255,255,1);
-    }
-    
-    /* Loading Spinner */
-    .spinner-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: white;
-    }
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border-left-color: #2980b9;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
     @media (max-width: 600px) {
       #introPage h1 { font-size: 1.8em; }
       .intro-btn { font-size: 1em; padding: 12px 25px; }
@@ -226,9 +134,6 @@
       .container { padding: 20px; }
       h1 { font-size: 1.5em; }
       input, button { font-size: 0.9em; }
-      .how-it-works h2 { font-size: 1.3em; }
-      .how-it-works li { font-size: 0.9em; }
-      .modal-content { width: 95%; height: 80%; }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -241,7 +146,7 @@
     <div class="how-it-works">
       <h2>How It Works</h2>
       <ol>
-        <li>Enter your details and your client's information.</li>
+        <li>Enter your details and your client’s information.</li>
         <li>Add the item description, quantity, and rate for your service.</li>
         <li>Click "Generate & Download PDF" to create your invoice—it downloads automatically!</li>
         <li>Love this tool? Support it with a donation to keep it free for everyone.</li>
@@ -256,42 +161,25 @@
       <div class="form-group">
         <label for="senderName">Your Name</label>
         <input id="senderName" placeholder="e.g., John Doe" required>
-        <div class="error-message" id="senderNameError">Please enter your name.</div>
       </div>
       <div class="form-group">
         <label for="clientName">Client Name</label>
         <input id="clientName" placeholder="e.g., Jane Smith" required>
-        <div class="error-message" id="clientNameError">Please enter the client's name.</div>
       </div>
       <div class="form-group">
         <label for="itemDesc">Item Description</label>
         <input id="itemDesc" placeholder="e.g., Web Design Services" required>
-        <div class="error-message" id="itemDescError">Please enter an item description.</div>
       </div>
       <div class="form-group">
         <label for="itemQty">Quantity</label>
         <input id="itemQty" type="number" placeholder="e.g., 1" min="1" required>
-        <div class="error-message" id="itemQtyError">Please enter a valid quantity (minimum 1).</div>
       </div>
       <div class="form-group">
         <label for="itemRate">Rate ($)</label>
         <input id="itemRate" type="number" placeholder="e.g., 50.00" min="0" step="0.01" required>
-        <div class="error-message" id="itemRateError">Please enter a valid rate (minimum 0).</div>
       </div>
       <button onclick="generatePDF()">Generate & Download PDF</button>
       <button class="donate-btn" onclick="openDonation()">Support with a Donation</button>
-    </div>
-  </div>
-
-  <!-- Modal for Stripe Donation -->
-  <div id="donationModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeDonation()">×</span>
-      <div id="stripeContainer">
-        <div class="spinner-container" id="loadingSpinner">
-          <div class="spinner"></div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -302,238 +190,46 @@
     function goToMainPage() {
       document.getElementById("introPage").style.display = "none";
       document.getElementById("mainPage").style.display = "block";
-      window.scrollTo(0, 0); // Ensure page starts at the top
-    }
-
-    // Input Validation
-    function validateInputs() {
-      let isValid = true;
-      const fields = [
-        { id: "senderName", errorId: "senderNameError", message: "Please enter your name." },
-        { id: "clientName", errorId: "clientNameError", message: "Please enter the client's name." },
-        { id: "itemDesc", errorId: "itemDescError", message: "Please enter an item description." },
-        { id: "itemQty", errorId: "itemQtyError", message: "Please enter a valid quantity (minimum 1)." },
-        { id: "itemRate", errorId: "itemRateError", message: "Please enter a valid rate (minimum 0)." }
-      ];
-
-      fields.forEach(field => {
-        const input = document.getElementById(field.id);
-        const error = document.getElementById(field.errorId);
-        const value = input.value.trim();
-
-        // Reset error state
-        input.classList.remove("error");
-        error.style.display = "none";
-
-        // Validate
-        if (field.id === "itemQty") {
-          if (!value || parseInt(value) < 1) {
-            input.classList.add("error");
-            error.style.display = "block";
-            error.textContent = field.message;
-            isValid = false;
-          }
-        } else if (field.id === "itemRate") {
-          if (!value || parseFloat(value) < 0) {
-            input.classList.add("error");
-            error.style.display = "block";
-            error.textContent = field.message;
-            isValid = false;
-          }
-        } else if (!value) {
-          input.classList.add("error");
-          error.style.display = "block";
-          error.textContent = field.message;
-          isValid = false;
-        }
-      });
-
-      return isValid;
     }
 
     // Generate PDF
     function generatePDF() {
-      if (!validateInputs()) {
-        alert("Please fill in all fields correctly before generating the invoice.");
-        return;
-      }
+      const doc = new jsPDF();
+      const senderName = document.getElementById("senderName").value;
+      const clientName = document.getElementById("clientName").value;
+      const desc = document.getElementById("itemDesc").value;
+      const qty = document.getElementById("itemQty").value;
+      const rate = document.getElementById("itemRate").value;
+      const total = (qty * rate).toFixed(2);
 
-      try {
-        const doc = new jsPDF();
-        const senderName = document.getElementById("senderName").value.trim();
-        const clientName = document.getElementById("clientName").value.trim();
-        const desc = document.getElementById("itemDesc").value.trim();
-        const qty = parseInt(document.getElementById("itemQty").value);
-        const rate = parseFloat(document.getElementById("itemRate").value);
-        const total = (qty * rate).toFixed(2);
-        
-        // Get current date
-        const today = new Date();
-        const dateStr = today.toLocaleDateString();
-        const invoiceNumber = `INV-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      // Professional PDF Layout
+      doc.setFontSize(18);
+      doc.text("Invoice", 20, 20);
+      doc.setFontSize(12);
+      doc.text(`From: ${senderName}`, 20, 30);
+      doc.text(`To: ${clientName}`, 20, 40);
+      doc.text(`Description: ${desc}`, 20, 50);
+      doc.text(`Quantity: ${qty}`, 20, 60);
+      doc.text(`Rate: $${rate}`, 20, 70);
+      doc.text(`Total: $${total}`, 20, 80);
+      doc.setFontSize(10);
+      doc.text("Created by Invoice Generator Pro | Support us: bit.ly/invoice-donate", 20, 100);
 
-        // Professional PDF Layout
-        doc.setFontSize(22);
-        doc.setTextColor(44, 62, 80); // Dark blue color
-        doc.text("INVOICE", 105, 20, { align: "center" });
-        
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100); // Gray color
-        doc.text(`Invoice #: ${invoiceNumber}`, 20, 30);
-        doc.text(`Date: ${dateStr}`, 20, 35);
-        
-        doc.setFontSize(12);
-        doc.setTextColor(44, 62, 80);
-        doc.text("FROM:", 20, 45);
-        doc.setTextColor(0, 0, 0);
-        doc.text(senderName, 20, 50);
-        
-        doc.setTextColor(44, 62, 80);
-        doc.text("TO:", 20, 60);
-        doc.setTextColor(0, 0, 0);
-        doc.text(clientName, 20, 65);
-        
-        // Table header
-        doc.setFillColor(44, 62, 80);
-        doc.rect(20, 75, 170, 8, "F");
-        doc.setTextColor(255, 255, 255);
-        doc.text("Description", 25, 80);
-        doc.text("Qty", 120, 80);
-        doc.text("Rate", 140, 80);
-        doc.text("Amount", 170, 80, { align: "right" });
-        
-        // Table content
-        doc.setTextColor(0, 0, 0);
-        doc.text(desc, 25, 90);
-        doc.text(qty.toString(), 120, 90);
-        doc.text(`$${rate.toFixed(2)}`, 140, 90);
-        doc.text(`$${total}`, 170, 90, { align: "right" });
-        
-        // Line
-        doc.setDrawColor(200, 200, 200);
-        doc.line(20, 95, 190, 95);
-        
-        // Total
-        doc.setFontSize(12);
-        doc.setTextColor(44, 62, 80);
-        doc.text("Total:", 150, 105);
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`$${total}`, 170, 105, { align: "right" });
-        
-        // Footer
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text("Created with Invoice Generator Pro", 105, 285, { align: "center" });
+      // Auto-download
+      doc.save("invoice.pdf");
 
-        // Auto-download
-        doc.save("invoice.pdf");
-
-        // Donation Prompt
-        setTimeout(() => {
-          if (confirm("Invoice downloaded! If this tool helped you, please consider supporting it.")) {
-            openDonation();
-          }
-        }, 500);
-      } catch (error) {
-        console.error("Error generating PDF:", error);
-        alert("An error occurred while generating the PDF. Please try again.");
-      }
+      // Donation Prompt
+      setTimeout(() => {
+        if (confirm("Invoice downloaded! If this tool helped you, please consider supporting it.")) {
+          openDonation();
+        }
+      }, 500);
     }
 
-    // Open Donation in Pop-Up Window
+    // Open Donation in New Tab
     function openDonation() {
-      const modal = document.getElementById("donationModal");
-      const container = document.getElementById("stripeContainer");
-      const loadingSpinner = document.getElementById("loadingSpinner");
-      
-      // Show the modal with the loading spinner first
-      modal.style.display = "flex";
-      loadingSpinner.style.display = "flex";
-
-      // Check if we already have an iframe
-      let iframe = document.querySelector(".modal-iframe");
-      
-      if (!iframe) {
-        // Create an iframe to load the Stripe page
-        iframe = document.createElement("iframe");
-        iframe.className = "modal-iframe";
-        iframe.style.display = "none"; // Hide until loaded
-        iframe.src = "https://buy.stripe.com/00g16Q5xv4Cw05G6oo";
-        
-        iframe.onload = () => {
-          console.log("Stripe iframe loaded successfully");
-          // Hide spinner and show iframe
-          loadingSpinner.style.display = "none";
-          iframe.style.display = "block";
-          
-          // Try to access iframe content to ensure it's fully loaded
-          try {
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            if (iframeDoc) {
-              // Successfully loaded
-              console.log("Iframe content accessed successfully");
-            }
-          } catch (e) {
-            console.log("Cannot access iframe content due to same-origin policy - this is normal");
-          }
-        };
-        
-        iframe.onerror = () => {
-          console.error("Error loading Stripe iframe");
-          loadingSpinner.style.display = "none";
-          alert("Failed to load the donation page. Please try again or open the link manually: https://buy.stripe.com/00g16Q5xv4Cw05G6oo");
-          closeDonation();
-        };
-
-        // Append the iframe
-        container.appendChild(iframe);
-      } else {
-        // If iframe exists, just show it and hide spinner
-        setTimeout(() => {
-          loadingSpinner.style.display = "none";
-          iframe.style.display = "block";
-        }, 500); // Short delay to ensure modal is visible first
-      }
+      window.open("https://buy.stripe.com/00g16Q5xv4Cw05G6oo", "_blank");
     }
-
-    // Close Donation Pop-Up
-    function closeDonation() {
-      const modal = document.getElementById("donationModal");
-      const loadingSpinner = document.getElementById("loadingSpinner");
-      
-      // Hide the modal
-      modal.style.display = "none";
-      
-      // Reset spinner for next time
-      loadingSpinner.style.display = "flex";
-      
-      // Keep the iframe in the DOM but hidden, for faster reload next time
-      const iframe = document.querySelector(".modal-iframe");
-      if (iframe) {
-        iframe.style.display = "none";
-      }
-    }
-
-    // Close Modal on Outside Click
-    window.addEventListener("click", (event) => {
-      const modal = document.getElementById("donationModal");
-      if (event.target === modal) {
-        closeDonation();
-      }
-    });
-    
-    // Handle potential mobile issues with iframe
-    window.addEventListener('resize', () => {
-      const iframe = document.querySelector(".modal-iframe");
-      if (iframe && iframe.style.display === "block") {
-        // Refresh iframe position on resize
-        iframe.style.height = "99%";
-        setTimeout(() => {
-          iframe.style.height = "100%";
-        }, 50);
-      }
-    });
   </script>
 </body>
 </html>
