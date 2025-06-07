@@ -5,13 +5,381 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: 'Poppins', Arial, sans-serif;
+    /* --- Cosmic Animated Background --- */
+    body, html {
+      min-height: 100vh;
+      min-width: 100vw;
       margin: 0;
       padding: 0;
-      background: #f0f4f8;
-      color: #333;
+      font-family: 'Inter', 'Poppins', Arial, sans-serif;
+      background: #0d1021;
       overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      z-index: -2;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      background: radial-gradient(ellipse at 60% 40%, #5f7cff 0%, #1a237e 60%, #000 100%);
+      opacity: 1;
+      animation: bgmove 20s ease-in-out infinite alternate;
+    }
+    @keyframes bgmove {
+      0% { background-position: 60% 40%; }
+      100% { background-position: 40% 60%; }
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      z-index: -1;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      background: url('data:image/svg+xml;utf8,<svg width="100%25" height="100%25" xmlns="http://www.w3.org/2000/svg"><circle cx="80" cy="40" r="1.2" fill="white" opacity="0.7"/><circle cx="220" cy="80" r="1.7" fill="white" opacity="0.4"/><circle cx="320" cy="120" r="1.1" fill="white" opacity="0.7"/><circle cx="500" cy="30" r="0.7" fill="white" opacity="0.5"/><circle cx="700" cy="200" r="1.3" fill="white" opacity="0.7"/></svg>');
+      background-size: 300px 200px;
+      animation: starshift 40s linear infinite;
+      opacity: 0.7;
+    }
+    @keyframes starshift {
+      0% { background-position: 0 0; }
+      100% { background-position: 300px 200px; }
+    }
+    /* --- Centered Cosmic Panel --- */
+    #mainPage, #introPage {
+      min-height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: none !important;
+      padding: 0;
+    }
+    .cosmic-panel {
+      background: rgba(30,38,80,0.65);
+      border-radius: 32px;
+      box-shadow: 0 8px 48px 0 #6f7cff33, 0 2px 18px 0 #fff2 inset;
+      border: 2px solid rgba(95,124,255,0.18);
+      backdrop-filter: blur(24px) saturate(1.4);
+      max-width: 500px;
+      width: 94vw;
+      padding: 48px 32px 36px 32px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      animation: fadein 1.2s cubic-bezier(.61,.01,.59,1.01);
+    }
+    @keyframes fadein {
+      0% { opacity: 0; transform: translateY(50px) scale(0.98); }
+      100% { opacity: 1; transform: none; }
+    }
+    .cosmic-panel h1 {
+      font-size: 2.4em;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      color: #fff;
+      margin-bottom: 20px;
+      text-shadow: 0 0 12px #6f7cff, 0 2px 24px #fff3;
+      filter: drop-shadow(0 0 8px #5f7cff99);
+      text-align: center;
+    }
+    .cosmic-panel .how-it-works {
+      margin-top: 18px;
+      width: 100%;
+      color: #e3e8ff;
+      text-align: left;
+    }
+    .cosmic-panel .how-it-works h2 {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 10px;
+      text-shadow: 0 1px 6px #5f7cff44;
+    }
+    .cosmic-panel .how-it-works ol {
+      margin: 0;
+      padding-left: 16px;
+    }
+    .cosmic-panel .how-it-works li {
+      margin-bottom: 8px;
+      font-size: 1em;
+      line-height: 1.7;
+      color: #e3e8ff;
+      text-shadow: 0 1px 4px #5f7cff22;
+    }
+    /* --- Inputs & Buttons --- */
+    .cosmic-panel input[type="text"], .cosmic-panel input[type="number"] {
+      width: 100%;
+      padding: 14px 12px;
+      border: 2px solid rgba(95,124,255,0.15);
+      border-radius: 14px;
+      font-size: 1em;
+      background: rgba(255,255,255,0.10);
+      color: #fff;
+      margin-bottom: 8px;
+      box-sizing: border-box;
+      transition: border 0.3s, box-shadow 0.3s, background 0.3s;
+      outline: none;
+      box-shadow: 0 1px 4px #5f7cff11;
+    }
+    .cosmic-panel input[type="text"]:focus, .cosmic-panel input[type="number"]:focus {
+      border: 2px solid #5f7cff;
+      background: rgba(95,124,255,0.09);
+      box-shadow: 0 0 0 4px #5f7cff33;
+    }
+    .cosmic-panel label {
+      color: #c7d0ff;
+      font-weight: 600;
+      margin-bottom: 3px;
+      display: block;
+      font-size: 1em;
+    }
+    .cosmic-panel .main-btn {
+      width: 100%;
+      padding: 18px 0;
+      margin: 18px 0 0 0;
+      font-size: 1.17em;
+      font-weight: 700;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(90deg, #5f7cff 0%, #8fd3f4 100%);
+      color: #fff;
+      box-shadow: 0 0 18px 2px #5f7cff44, 0 2px 12px #fff2 inset;
+      cursor: pointer;
+      transition: background 0.25s, box-shadow 0.25s, color 0.2s, transform 0.13s;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.04em;
+    }
+    .cosmic-panel .main-btn:hover {
+      background: linear-gradient(90deg, #8fd3f4 0%, #5f7cff 100%);
+      color: #fff;
+      box-shadow: 0 0 32px 8px #5f7cff77, 0 2px 16px #fff3 inset;
+      transform: scale(1.03);
+    }
+    /* --- Invoice Table --- */
+    .cosmic-panel table {
+      width: 100%;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      overflow: hidden;
+      border-collapse: separate;
+      border-spacing: 0;
+      color: #fff;
+    }
+    .cosmic-panel th, .cosmic-panel td {
+      padding: 10px 6px;
+      text-align: left;
+      font-size: 1em;
+    }
+    .cosmic-panel th {
+      font-weight: 700;
+      color: #fff;
+      background: rgba(95,124,255,0.13);
+      border-bottom: 1.5px solid #5f7cff33;
+    }
+    .cosmic-panel td {
+      background: none;
+      border-bottom: 1px solid #5f7cff15;
+    }
+    .cosmic-panel .remove-item-btn {
+      background: none;
+      color: #e57373;
+      border: none;
+      font-size: 1.3em;
+      cursor: pointer;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .cosmic-panel .remove-item-btn:hover {
+      color: #ff1744;
+      transform: scale(1.2) rotate(-12deg);
+    }
+    .cosmic-panel .add-item-btn {
+      width: 100%;
+      margin-bottom: 16px;
+      background: rgba(95,124,255,0.13);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 0;
+      font-weight: 700;
+      font-size: 1.05em;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.13s;
+      letter-spacing: 0.03em;
+    }
+    .cosmic-panel .add-item-btn:hover {
+      background: rgba(95,124,255,0.22);
+      color: #8fd3f4;
+      transform: scale(1.04);
+    }
+    @media (max-width: 600px) {
+      .cosmic-panel {
+        padding: 24px 4vw 20px 4vw;
+        border-radius: 18px;
+      }
+      .cosmic-panel h1 {
+        font-size: 1.3em;
+      }
+    }
+
+    /* Cosmic animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: -2;
+      background: radial-gradient(ellipse at 60% 40%, #5f7cff 0%, #1a237e 60%, #000 100%);
+      animation: bgmove 24s ease-in-out infinite alternate;
+      opacity: 1;
+    }
+    @keyframes bgmove {
+      0% { background-position: 60% 40%; }
+      100% { background-position: 40% 60%; }
+    }
+    /* Animated stars */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+      background: url('data:image/svg+xml;utf8,<svg width="100%25" height="100%25" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="1.5" fill="white" opacity="0.7"/><circle cx="80" cy="40" r="1" fill="white" opacity="0.5"/><circle cx="150" cy="80" r="1.2" fill="white" opacity="0.6"/><circle cx="220" cy="30" r="0.8" fill="white" opacity="0.4"/><circle cx="320" cy="70" r="1.3" fill="white" opacity="0.6"/><circle cx="400" cy="50" r="1.1" fill="white" opacity="0.5"/></svg>');
+      background-size: 200px 100px;
+      animation: starshift 30s linear infinite;
+    }
+    @keyframes starshift {
+      0% { background-position: 0 0; }
+      100% { background-position: 200px 100px; }
+    }
+
+    /* Glassmorphism cosmic panel */
+    #introPage, #mainPage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      width: 100vw;
+      background: none;
+      padding: 0;
+    }
+    .cosmic-card {
+      background: rgba(30, 34, 90, 0.55);
+      border-radius: 32px;
+      box-shadow: 0 8px 40px 0 rgba(60, 80, 255, 0.15), 0 1.5px 16px 0 rgba(255,255,255,0.08) inset;
+      backdrop-filter: blur(18px) saturate(1.4);
+      border: 1.5px solid rgba(255,255,255,0.13);
+      max-width: 420px;
+      width: 90vw;
+      padding: 48px 32px 36px 32px;
+      margin: 32px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      animation: fadein 1.3s cubic-bezier(.61,.01,.59,1.01);
+    }
+    @keyframes fadein {
+      0% { opacity: 0; transform: translateY(40px) scale(0.98); }
+      100% { opacity: 1; transform: none; }
+    }
+    .cosmic-card h1 {
+      font-size: 2.3em;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: #fff;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 16px #5f7cff33;
+    }
+    .cosmic-card .intro-btn {
+      width: 100%;
+      padding: 18px 0;
+      margin: 18px 0 22px 0;
+      font-size: 1.15em;
+      font-weight: 600;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(90deg, #ffb347 0%, #ffcc80 100%);
+      color: #2c3e50;
+      box-shadow: 0 0 18px 2px #ffb34744, 0 2px 12px #fff2 inset;
+      cursor: pointer;
+      transition: background 0.25s, box-shadow 0.25s, color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .cosmic-card .intro-btn:hover {
+      background: linear-gradient(90deg, #ffcc80 0%, #ffb347 100%);
+      color: #1a237e;
+      box-shadow: 0 0 26px 6px #ffb34755, 0 2px 16px #fff3 inset;
+    }
+    .cosmic-card .how-it-works {
+      margin-top: 18px;
+      width: 100%;
+      color: #e3e8ff;
+      text-align: left;
+    }
+    .cosmic-card .how-it-works h2 {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 10px;
+      text-shadow: 0 1px 6px #5f7cff44;
+    }
+    .cosmic-card .how-it-works ol {
+      margin: 0;
+      padding-left: 16px;
+    }
+    .cosmic-card .how-it-works li {
+      margin-bottom: 8px;
+      font-size: 1em;
+      line-height: 1.7;
+      color: #e3e8ff;
+      text-shadow: 0 1px 4px #5f7cff22;
+    }
+    @media (max-width: 600px) {
+      .cosmic-card {
+        padding: 24px 8vw 20px 8vw;
+        border-radius: 18px;
+      }
+      .cosmic-card h1 {
+        font-size: 1.3em;
+      }
+    }
+    /* Hide old backgrounds */
+    #introPage, #mainPage { background: none !important; }
+
+    :root {
+      --primary: #2980b9;
+      --primary-light: #3498db;
+      --secondary: #e67e22;
+      --secondary-light: #f39c12;
+      --text: #2c3e50;
+      --text-light: #555;
+      --bg: #f0f4f8;
+    }
+
+    @keyframes movingLines {
+      0% { background-position: 0 0; }
+      100% { background-position: 100px 100px; }
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: 
+        repeating-linear-gradient(45deg, rgba(52, 152, 219, 0.03) 0px, rgba(52, 152, 219, 0.03) 1px, transparent 1px, transparent 30px),
+        repeating-linear-gradient(-45deg, rgba(230, 126, 34, 0.03) 0px, rgba(230, 126, 34, 0.03) 1px, transparent 1px, transparent 30px),
+        radial-gradient(circle at top right, #3498db22, transparent),
+        radial-gradient(circle at bottom left, #e67e2222, transparent);
+      background-size: 100px 100px, 100px 100px, 100% 100%, 100% 100%;
+      animation: movingLines 15s linear infinite;
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
     }
 
     /* Intro Page */
@@ -22,9 +390,27 @@
       align-items: center;
       height: 100vh;
       text-align: center;
-      background: linear-gradient(135deg, #2980b9, #6ab7f5);
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
       color: white;
       padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #introPage::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+      animation: rotate 20s linear infinite;
+      top: -50%;
+      left: -50%;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
     #introPage h1 {
       font-size: 2.5em;
@@ -32,7 +418,7 @@
     }
     .intro-btn {
       padding: 15px 30px;
-      background: #e67e22;
+      background: var(--secondary);
       color: white;
       border: none;
       border-radius: 25px;
@@ -42,7 +428,7 @@
       transition: background 0.3s;
     }
     .intro-btn:hover {
-      background: #f39c12;
+      background: var(--secondary-light);
     }
     @keyframes pulse {
       0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
@@ -74,10 +460,44 @@
       margin: 0 auto;
     }
     .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: rgba(30, 34, 90, 0.65);
+      backdrop-filter: blur(18px) saturate(1.2);
+      padding: 44px 32px 36px 32px;
+      border-radius: 28px;
+      box-shadow: 0 10px 48px 0 rgba(60, 80, 255, 0.13), 0 2px 18px 0 rgba(255,255,255,0.10) inset;
+      border: 1.5px solid rgba(255,255,255,0.10);
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 520px;
+      width: 94vw;
+      animation: fadein 1.2s cubic-bezier(.61,.01,.59,1.01);
+    }
+    .container:hover {
+      transform: translateY(-2px) scale(1.01);
+    }
+    .main-btn {
+      width: 100%;
+      padding: 18px 0;
+      margin: 18px 0 0 0;
+      font-size: 1.15em;
+      font-weight: 600;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(90deg, #5f7cff 0%, #8fd3f4 100%);
+      color: #fff;
+      box-shadow: 0 0 18px 2px #5f7cff44, 0 2px 12px #fff2 inset;
+      cursor: pointer;
+      transition: background 0.25s, box-shadow 0.25s, color 0.2s;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.03em;
+    }
+    .main-btn:hover {
+      background: linear-gradient(90deg, #8fd3f4 0%, #5f7cff 100%);
+      color: #fff;
+      box-shadow: 0 0 26px 6px #5f7cff55, 0 2px 16px #fff3 inset;
     }
     h1 {
       font-size: 2em;
@@ -96,37 +516,61 @@
     }
     input {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      padding: 14px;
+      border: 2px solid transparent;
+      border-radius: 12px;
       font-size: 1em;
       box-sizing: border-box;
-      transition: border 0.3s;
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
+    
+    input:hover {
+      background: rgba(255,255,255,1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
     input:focus {
-      border-color: #2980b9;
+      border-color: var(--primary);
       outline: none;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(41,128,185,0.2);
     }
     button {
       width: 100%;
-      padding: 15px;
-      background: #2980b9;
+      padding: 16px;
+      background: var(--primary);
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 12px;
       font-size: 1.1em;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    
+    button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: translateX(-100%);
+    }
+    
+    button:hover::after {
+      transform: translateX(100%);
+      transition: transform 0.6s ease;
     }
     button:hover {
-      background: #3498db;
+      background: var(--primary-light);
     }
-    .donate-btn {
-      background: #e67e22;
-    }
-    .donate-btn:hover {
-      background: #f39c12;
-    }
+
     @media (max-width: 600px) {
       #introPage h1 { font-size: 1.8em; }
       .intro-btn { font-size: 1em; padding: 12px 25px; }
@@ -136,50 +580,60 @@
       input, button { font-size: 0.9em; }
     }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <!-- Intro Page -->
   <div id="introPage">
-    <h1>Welcome to Invoice Generator Pro</h1>
-    <button class="intro-btn" onclick="goToMainPage()">Tap to Generate Invoice</button>
-    <div class="how-it-works">
-      <h2>How It Works</h2>
-      <ol>
-        <li>Enter your details and your client’s information.</li>
-        <li>Add the item description, quantity, and rate for your service.</li>
-        <li>Click "Generate & Download PDF" to create your invoice—it downloads automatically!</li>
-        <li>Love this tool? Support it with a donation to keep it free for everyone.</li>
-      </ol>
+    <div class="cosmic-panel">
+      <h1>Welcome to Invoice Generator Pro</h1>
+      <button class="main-btn" onclick="goToMainPage()">Tap to Generate Invoice</button>
+      <div class="how-it-works">
+        <h2>How It Works</h2>
+        <ol>
+          <li>Enter your details and your client’s information.</li>
+          <li>Add any number of invoice items (description, quantity, rate).</li>
+          <li>Click "Generate & Download PDF" to create your invoice—it downloads automatically!</li>
+        </ol>
+      </div>
     </div>
   </div>
 
   <!-- Main Page -->
   <div id="mainPage">
-    <h1>Create Your Invoice</h1>
-    <div class="container">
+    <div class="cosmic-panel">
+      <h1>Create Your Invoice</h1>
       <div class="form-group">
         <label for="senderName">Your Name</label>
-        <input id="senderName" placeholder="e.g., John Doe" required>
+        <input id="senderName" placeholder="e.g., John Doe" required type="text">
       </div>
       <div class="form-group">
         <label for="clientName">Client Name</label>
-        <input id="clientName" placeholder="e.g., Jane Smith" required>
+        <input id="clientName" placeholder="e.g., Jane Smith" required type="text">
       </div>
       <div class="form-group">
-        <label for="itemDesc">Item Description</label>
-        <input id="itemDesc" placeholder="e.g., Web Design Services" required>
+        <label>Invoice Items</label>
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Rate</th>
+              <th>Remove</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody">
+            <tr>
+              <td><input class="item-desc" placeholder="e.g., Web Design" required type="text"></td>
+              <td><input class="item-qty" type="number" min="1" value="1" required></td>
+              <td><input class="item-rate" type="number" min="0" step="0.01" value="0.00" required></td>
+              <td><button type="button" class="remove-item-btn" onclick="removeItem(this)">&times;</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" class="add-item-btn" onclick="addItemRow()">+ Add Item</button>
       </div>
-      <div class="form-group">
-        <label for="itemQty">Quantity</label>
-        <input id="itemQty" type="number" placeholder="e.g., 1" min="1" required>
-      </div>
-      <div class="form-group">
-        <label for="itemRate">Rate ($)</label>
-        <input id="itemRate" type="number" placeholder="e.g., 50.00" min="0" step="0.01" required>
-      </div>
-      <button onclick="generatePDF()">Generate & Download PDF</button>
-      <button class="donate-btn" onclick="openDonation()">Support with a Donation</button>
+      <button onclick="generatePDF()" class="main-btn">Generate & Download PDF</button>
     </div>
   </div>
 
@@ -189,46 +643,62 @@
     // Navigate to Main Page
     function goToMainPage() {
       document.getElementById("introPage").style.display = "none";
-      document.getElementById("mainPage").style.display = "block";
+      document.getElementById("mainPage").style.display = "flex";
+    }
+    // Add/Remove invoice item rows
+    function addItemRow() {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td><input class='item-desc' placeholder='e.g., Service' required></td><td><input class='item-qty' type='number' min='1' value='1' required></td><td><input class='item-rate' type='number' min='0' step='0.01' value='0.00' required></td><td><button type='button' class='remove-item-btn' onclick='removeItem(this)' style='background:none;color:#e57373;border:none;font-size:1.2em;cursor:pointer;'>&times;</button></td>`;
+      document.getElementById('itemsBody').appendChild(row);
+    }
+    function removeItem(btn) {
+      const row = btn.closest('tr');
+      if (document.querySelectorAll('#itemsBody tr').length > 1) {
+        row.remove();
+      }
     }
 
     // Generate PDF
     function generatePDF() {
       const doc = new jsPDF();
-      const senderName = document.getElementById("senderName").value;
-      const clientName = document.getElementById("clientName").value;
-      const desc = document.getElementById("itemDesc").value;
-      const qty = document.getElementById("itemQty").value;
-      const rate = document.getElementById("itemRate").value;
-      const total = (qty * rate).toFixed(2);
-
-      // Professional PDF Layout
+      const senderName = document.getElementById("senderName").value.trim();
+      const clientName = document.getElementById("clientName").value.trim();
+      const itemRows = document.querySelectorAll('#itemsBody tr');
+      let items = [];
+      let total = 0;
+      for (let row of itemRows) {
+        const desc = row.querySelector('.item-desc').value.trim();
+        const qty = parseFloat(row.querySelector('.item-qty').value);
+        const rate = parseFloat(row.querySelector('.item-rate').value);
+        if (desc && qty > 0 && rate >= 0) {
+          items.push({ desc, qty, rate, lineTotal: qty * rate });
+          total += qty * rate;
+        }
+      }
+      // Basic validation
+      if (!senderName || !clientName || items.length === 0) {
+        alert('Please fill in all required fields and at least one valid item.');
+        return;
+      }
+      // PDF Layout
       doc.setFontSize(18);
       doc.text("Invoice", 20, 20);
       doc.setFontSize(12);
       doc.text(`From: ${senderName}`, 20, 30);
       doc.text(`To: ${clientName}`, 20, 40);
-      doc.text(`Description: ${desc}`, 20, 50);
-      doc.text(`Quantity: ${qty}`, 20, 60);
-      doc.text(`Rate: $${rate}`, 20, 70);
-      doc.text(`Total: $${total}`, 20, 80);
+      let y = 50;
+      doc.text('Items:', 20, y);
+      y += 8;
+      items.forEach((item, idx) => {
+        doc.text(`${idx+1}. ${item.desc} | Qty: ${item.qty} | Rate: $${item.rate.toFixed(2)} | Total: $${item.lineTotal.toFixed(2)}`, 22, y);
+        y += 8;
+      });
+      y += 4;
+      doc.setFontSize(14);
+      doc.text(`Total: $${total.toFixed(2)}`, 20, y);
       doc.setFontSize(10);
-      doc.text("Created by Invoice Generator Pro | Support us: bit.ly/invoice-donate", 20, 100);
-
-      // Auto-download
+      doc.text("Created by Invoice Generator Pro | Free for everyone", 20, y+12);
       doc.save("invoice.pdf");
-
-      // Donation Prompt
-      setTimeout(() => {
-        if (confirm("Invoice downloaded! If this tool helped you, please consider supporting it.")) {
-          openDonation();
-        }
-      }, 500);
-    }
-
-    // Open Donation in New Tab
-    function openDonation() {
-      window.open("https://buy.stripe.com/00g16Q5xv4Cw05G6oo", "_blank");
     }
   </script>
 </body>
